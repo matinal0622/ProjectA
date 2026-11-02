@@ -14,4 +14,6 @@ Desktop.ini
 *.swo
 *~
 
-# Add language-specific build and dependency paths once the stack is chosen.
+# Java build output
+bin/
+*.class

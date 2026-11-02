@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Chocolate Shop",
+            "request": "launch",
+            "mainClass": "ChocolateShop",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

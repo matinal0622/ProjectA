@@ -1,57 +1,76 @@
-# ProjectA
+# Chocolate Shop 库存和会员系统
 
-三人协作代码仓库。`main` 保存团队确认后的代码；每人使用自己的任务分支，通过 Pull Request（PR）合并。
+当前本地程序只包含 Shiyou 的 UC1 商品与库存管理、UC2 会员系统。使用终端文字菜单，不使用 JavaFX 或 MVC。没有销售结算、购买记录、报告、商品折扣管理或供应商管理功能。
 
-## 加入团队
+## 运行
 
-仓库所有者在 Settings → Collaborators → Add people 邀请另外两位成员。成员接受邀请后才能向本仓库推送分支。每个人使用自己的 GitHub 账号。
+在 VS Code 中打开本目录，打开 `src/ChocolateShop.java`，点击 `main()` 上方的 Run。或在本目录终端执行：
 
-## 第一次获取项目
-
-```bash
-git clone https://github.com/matinal0622/ProjectA.git
-cd ProjectA
+```sh
+mkdir -p bin
+javac --release 17 -encoding UTF-8 -d bin src/*.java
+java -cp bin ChocolateShop
 ```
 
-也可以使用 GitHub Desktop：File → Clone repository → URL，输入上面的仓库地址。使用已接受邀请的账号登录。
+主菜单：
 
-## 每次开发流程
-
-1. 在 Issues 创建任务，写清目标并指派负责人，避免重复修改同一功能。
-2. 从最新 main 创建任务分支，将下面的 `yourname` 和 `task-name` 换成自己的名字和任务名。
-
-```bash
-git switch main
-git pull --ff-only origin main
-git switch -c feature/yourname-task-name
+```text
+1. Stock management
+2. Membership
+3. Exit
 ```
 
-3. 编写代码并在本地运行检查；用 `git status` 和 `git diff` 确认要上传的内容。
+UC1 子菜单：
 
-```bash
-git status
-git diff
-git add path/to/changed-file
-git commit -m "Describe the change"
-git push -u origin HEAD
+```text
+1. Add product
+2. Increase stock
+3. Decrease stock
+4. Remove product
+5. View stock
+0. Back
 ```
 
-`path/to/changed-file` 是占位符，请替换为实际改动文件路径。
+- Add product：输入名称、类型 D/M、克重、可可比例、初始数量、到期信息、进价和售价。
+- Increase stock：增加已上架商品的数量，不扣款，也不生成采购记录。
+- Decrease stock：减少数量，例如损坏或过期；不能减成负数。减到零不会自动下架。
+- Remove product：显示商品和剩余数量，只有输入 Y 才删除当前商品、库存和价格；N 或其他输入取消。此版本没有历史表，不会操作组员的历史数据。
+- View stock：输入完整名称查询单个商品；直接回车查询全部商品。
+- 商品名和会员编号区分大小写，忽略首尾空格。到期信息目前只是可选文字，不检查日期格式。
 
-4. 在 GitHub 点击 Compare & pull request，目标分支选择 `main`，说明改动和测试方法，请另一位成员检查。
-5. 检查通过、冲突解决后合并 PR。其他成员切回 main 并执行 `git pull --ff-only origin main` 获取更新，再开始下一项任务。
+UC2 菜单：A 注册会员，V 查询会员资料和积分。
 
-GitHub Desktop 对应操作：Fetch origin / Pull origin → New branch → 修改文件 → Commit → Publish branch / Push origin → Create Pull Request。
+## 会员优惠与积分
 
-## 使用网页上传代码
+保留会员九折、商品折扣叠加、最低不低于进价和积分接口，不提供销售结算页面。
 
-在 Code 页的分支菜单中，从 main 创建自己的任务分支 → Add file → Upload files → 上传源代码并提交到该分支 → 创建 PR 合并到 main。不要上传整个压缩包代替可阅读的源代码。
+- `getCheckoutPrice(productName, memberId, discountRate)` 计算单价；商品折扣由组员传入，例如 0.20 表示八折。
+- 两参数 `getCheckoutPrice(productName, memberId)` 表示没有商品折扣。
+- `memberId` 为空字符串表示非会员；不存在的非空会员编号返回失败。
+- `addMemberPoints(memberId, paidAmount)` 按每笔实付每满 $1 积 1 分；不足 $1 的部分不跨笔累计。不做积分兑换。
+- 购买功能接入后，由它在支付成功后调用积分接口一次。接口本身不验证支付、不判断重复订单，不要从库存调整或价格查询中调用它。
 
-## 团队约定
+## 示例
 
-- 一个任务一个分支、一个 PR；提交说明写清楚修改目的。
-- 合并前由另一位成员检查，并在 PR 中记录实际运行过的检查结果。
-- 开始工作前先同步 main；有未提交修改时先提交或妥善保存。
-- 遇到推送被拒绝或合并冲突，先同步并协调修改；不要使用 force push 覆盖队友提交。
-- 不提交密码、访问令牌、真实凭据、个人配置或编译产物。当前仓库为公开仓库，提交内容会公开可见。
-- 代码加入后，在本文件补充实际使用的语言、运行环境、启动命令和测试命令。
+1. 选 2 → A，注册 M1 / Alex / 0400000000。
+2. 选 1 → 1，上架 Hazelnut Chocolate，类型 M、100 g、35% 可可、初始库存 8，进价 2.50、售价 6.00。
+3. 选 2，给该商品增加 4 件，库存变为 12。
+4. 选 3，减少 2 件，库存变为 10。
+5. 选 5，输入商品名称查看；选 4，再输入 Y 下架。
+6. 选 0 返回主菜单，2 → V → M1 查询。库存操作后会员积分仍为 0。
+
+## 数值范围和保存方式
+
+为了用基础判断处理数值边界，本地示例暂设：单品库存最多 1000000 件、克重最多 1000000 g、单价和单次积分入账金额最多 $1000000、会员总积分最多 1000000。超过范围返回失败，不自动截断。它们是可调整的示例限制，不是已确认的课程业务要求。
+
+输入金额最多两位小数；折扣后的单价四舍五入到分。所有数据仅在内存中保存，退出后不保存，下次运行重新加载两种演示商品。
+
+In.java 已恢复为老师在 Week 1 提供的原版。菜单通过 In.nextLine() 读取文字，在 Menu / ChocolateShop 中检查选项和表单字段；空输入、非数字、负数量等会被拒绝。无效表单字段返回库存菜单，重新选上架或增减库存即可再次填写。金额请填写 0.50、2 或 2.50，不使用 .50、2. 或科学计数法。
+
+原版 In 不负责处理输入流结束，请用主菜单 3 退出，不使用 Ctrl+D 代替退出选项。
+
+## 验证与对接
+
+运行方式和测试范围见 [测试说明](docs/TESTING.md)，组员需要统一的方法及参数见 [命名与接口约定](docs/NAMING_GUIDE.md)。
+
+原有团队协作流程见 [协作说明](docs/COLLABORATION.md)。此版本在个人分支维护，合并到 main 前应由组员检查。
