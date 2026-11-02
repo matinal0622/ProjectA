@@ -1,0 +1,26 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Chocolate Shop",
+            "type": "process",
+            "command": "javac",
+            "args": [
+                "--release", "17",
+                "-encoding", "UTF-8",
+                "-g",
+                "-d", "bin",
+                "-sourcepath", "src",
+                "src/ChocolateShop.java"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": ["$javac"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

@@ -6,6 +6,9 @@
             "name": "Chocolate Shop",
             "request": "launch",
             "mainClass": "ChocolateShop",
+            "classPaths": ["${workspaceFolder}/bin"],
+            "sourcePaths": ["${workspaceFolder}/src"],
+            "preLaunchTask": "Build Chocolate Shop",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
         }
