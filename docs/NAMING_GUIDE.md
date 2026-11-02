@@ -55,13 +55,3 @@ addMemberPoints() 不检查支付凭证，也不去重。不要在预览价格�
 商品名称与会员编号区分大小写，首尾空格会去掉。
 会员减价比例在 Database.MEMBER_DISCOUNT_RATE。
 示例上限：库存和克重 1000000，单价/单次入账金额 1000000，总积分 1000000。可在对应常量处调整，但金额扩大时要同时检查转 int 的范围。
-
-## 表格及旧版变更
-
-- stock 行键为 productName，列 0 是 Quantity，列 1 是 Expiry。
-- prices 行键为 productName，列 0 是 Buy Price，列 1 是 Sell Price。
-- 不再保留 Reorder Level，因此 addProduct() 不再接受 reorderLevel 参数。
-- 删除了 buyOrder()、sellOrder()、getBalance()、getOrder()、getOrderKeys()。
-- getSalePrice() 的旧折扣表读取实现不再保留；读原价用 getSellPrice()，计算最终价用 getCheckoutPrice()。
-- Database 只保留无参数构造方法，不再接收 orders/customers/discounts 共用表。
-- 当前库存调整不会改变组员的历史订单。合并时历史记录应自行保存成交时的数据，不依赖仍然上架的商品对象。

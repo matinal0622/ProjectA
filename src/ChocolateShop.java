@@ -4,7 +4,7 @@ public class ChocolateShop {
 
     public ChocolateShop() {
         database = new Database();
-        String[] menuOptions = {"Chocolate Shop", "Stock management", "Membership"};
+        String[] menuOptions = { "Chocolate Shop", "Stock management", "Membership" };
         menu = new Menu(menuOptions);
         addStartingData();
     }
