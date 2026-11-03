@@ -41,8 +41,9 @@ public class DataTable {
     public ArrayList<String> getRow(String key) {
         if (!rows.containsKey(key)) {
             return null;
+        } else {
+            return new ArrayList<>(rows.get(key));
         }
-        return new ArrayList<>(rows.get(key));
     }
 
     public ArrayList<String> getColumn(String attribute) {
@@ -50,54 +51,72 @@ public class DataTable {
         int index = attributes.indexOf(attribute);
         if (index < 0) {
             return column;
-        }
-        for (String key : getKeys()) {
-            String value = getValue(key, index);
-            if (value != null) {
-                column.add(value);
+        } else {
+            for (String key : getKeys()) {
+                String value = getValue(key, index);
+                if (value != null) {
+                    column.add(value);
+                }
             }
+            return column;
         }
-        return column;
     }
 
     public String getValue(String key, int index) {
         if (!rows.containsKey(key)) {
             return null;
-        }
-        if (index < 0 || index >= rows.get(key).size()) {
+        } else if (index < 0) {
             return null;
+        } else if (index >= rows.get(key).size()) {
+            return null;
+        } else {
+            return rows.get(key).get(index);
         }
-        return rows.get(key).get(index);
     }
 
     public void updateRow(String key, ArrayList<String> newRow) {
-        if (key != null && !key.trim().equals("") && newRow != null) {
+        if (key == null) {
+            return;
+        } else if (key.trim().equals("")) {
+            return;
+        } else if (newRow == null) {
+            return;
+        } else {
             rows.put(key, new ArrayList<>(newRow));
         }
     }
 
     public void updateValue(String key, int index, String newValue) {
-        if (key == null || key.trim().equals("") || index < 0
-                || index >= attributes.size() || newValue == null) {
+        if (key == null) {
             return;
+        } else if (key.trim().equals("")) {
+            return;
+        } else if (index < 0) {
+            return;
+        } else if (index >= attributes.size()) {
+            return;
+        } else if (newValue == null) {
+            return;
+        } else {
+            ArrayList<String> values = rows.get(key);
+            if (values == null) {
+                values = new ArrayList<>();
+            }
+            while (values.size() <= index) {
+                values.add("");
+            }
+            values.set(index, newValue);
+            rows.put(key, values);
         }
-        ArrayList<String> values = rows.get(key);
-        if (values == null) {
-            values = new ArrayList<>();
-        }
-        while (values.size() <= index) {
-            values.add("");
-        }
-        values.set(index, newValue);
-        rows.put(key, values);
     }
 
     public boolean removeRow(String key) {
         if (!rows.containsKey(key)) {
             return false;
+        } else {
+            rows.remove(key);
+            return true;
         }
-        rows.remove(key);
-        return true;
     }
 
     @Override

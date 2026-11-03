@@ -29,11 +29,14 @@ public class Member {
     }
 
     public boolean addPoints(int earnedPoints) {
-        if (earnedPoints < 0 || earnedPoints > MAX_POINTS - points) {
+        if (earnedPoints < 0) {
             return false;
+        } else if (earnedPoints > MAX_POINTS - points) {
+            return false;
+        } else {
+            points = points + earnedPoints;
+            return true;
         }
-        points = points + earnedPoints;
-        return true;
     }
 
     @Override

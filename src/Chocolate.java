@@ -1,6 +1,3 @@
-/**
- * Common product details. Database checks the details before listing a product.
- */
 public abstract class Chocolate {
     private final String name;
     private final int weightGrams;
@@ -37,4 +34,5 @@ public abstract class Chocolate {
         return name + " | " + getType() + " | " + weightGrams + " g | "
                 + cocoaPercentage + "% cocoa | Ingredients: " + getIngredients();
     }
+
 }
