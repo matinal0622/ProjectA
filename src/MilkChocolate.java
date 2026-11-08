@@ -13,9 +13,4 @@ public class MilkChocolate extends Chocolate {
     public String getIngredients() {
         return "cocoa mass, sugar, milk powder, cocoa butter";
     }
-
-    @Override
-    public String toString() {
-        return super.toString();
-    }
 }

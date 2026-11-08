@@ -77,7 +77,7 @@ public class DataTable {
     public void updateRow(String key, ArrayList<String> newRow) {
         if (key == null) {
             return;
-        } else if (key.trim().equals("")) {
+        } else if (key.equals("")) {
             return;
         } else if (newRow == null) {
             return;
@@ -89,7 +89,7 @@ public class DataTable {
     public void updateValue(String key, int index, String newValue) {
         if (key == null) {
             return;
-        } else if (key.trim().equals("")) {
+        } else if (key.equals("")) {
             return;
         } else if (index < 0) {
             return;

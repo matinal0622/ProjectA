@@ -4,8 +4,6 @@ import java.util.HashMap;
 
 public class Database {
     private static final double MEMBER_DISCOUNT_RATE = 0.10;
-    private static final int MAX_QUANTITY = 1000000;
-    private static final double MAX_PRICE = 1000000.0;
 
     private DataTable stock;
     private DataTable prices;
@@ -22,7 +20,7 @@ public class Database {
     private boolean isBlank(String value) {
         if (value == null) {
             return true;
-        } else if (value.trim().equals("")) {
+        } else if (value.equals("")) {
             return true;
         } else {
             return false;
@@ -31,7 +29,7 @@ public class Database {
 
     private boolean validPrice(double value) {
         if (value >= 0) {
-            if (value <= MAX_PRICE) {
+            if (value <= Double.MAX_VALUE) {
                 return true;
             } else {
                 return false;
@@ -39,11 +37,6 @@ public class Database {
         } else {
             return false;
         }
-    }
-
-    private double roundMoney(double value) {
-        int cents = (int) (value * 100 + 0.5);
-        return cents / 100.0;
     }
 
     public boolean addProduct(Chocolate product, int quantity, String expiry,
@@ -54,15 +47,11 @@ public class Database {
             return false;
         } else if (product.getWeightGrams() <= 0) {
             return false;
-        } else if (product.getWeightGrams() > MAX_QUANTITY) {
-            return false;
         } else if (product.getCocoaPercentage() < 0) {
             return false;
         } else if (product.getCocoaPercentage() > 100) {
             return false;
         } else if (quantity < 0) {
-            return false;
-        } else if (quantity > MAX_QUANTITY) {
             return false;
         } else if (expiry == null) {
             return false;
@@ -72,18 +61,16 @@ public class Database {
             return false;
         } else if (sellPrice < buyPrice) {
             return false;
+        } else if (products.containsKey(product.getName())) {
+            return false;
         } else {
             String productName = product.getName();
-            if (products.containsKey(productName)) {
-                return false;
-            } else {
-                products.put(productName, product);
-                stock.updateRow(productName, new ArrayList<>(Arrays.asList(
-                        String.valueOf(quantity), expiry.trim())));
-                prices.updateRow(productName, new ArrayList<>(Arrays.asList(
-                        String.valueOf(roundMoney(buyPrice)), String.valueOf(roundMoney(sellPrice)))));
-                return true;
-            }
+            products.put(productName, product);
+            stock.updateRow(productName, new ArrayList<>(Arrays.asList(
+                    String.valueOf(quantity), expiry)));
+            prices.updateRow(productName, new ArrayList<>(Arrays.asList(
+                    String.valueOf(buyPrice), String.valueOf(sellPrice))));
+            return true;
         }
     }
 
@@ -91,7 +78,7 @@ public class Database {
         if (isBlank(productName)) {
             return false;
         } else {
-            return products.containsKey(productName.trim());
+            return products.containsKey(productName);
         }
     }
 
@@ -99,7 +86,7 @@ public class Database {
         if (!hasProduct(productName)) {
             return null;
         } else {
-            return products.get(productName.trim());
+            return products.get(productName);
         }
     }
 
@@ -107,7 +94,7 @@ public class Database {
         if (!hasProduct(productName)) {
             return -1;
         } else {
-            return Integer.valueOf(stock.getValue(productName.trim(), 0));
+            return Integer.valueOf(stock.getValue(productName, 0));
         }
     }
 
@@ -116,14 +103,12 @@ public class Database {
             return false;
         } else if (quantity <= 0) {
             return false;
-        } else if (quantity > MAX_QUANTITY) {
-            return false;
         } else {
             int currentQuantity = getStockQuantity(productName);
-            if (currentQuantity + quantity > MAX_QUANTITY) {
+            if (quantity > Integer.MAX_VALUE - currentQuantity) {
                 return false;
             } else {
-                stock.updateValue(productName.trim(), 0, String.valueOf(currentQuantity + quantity));
+                stock.updateValue(productName, 0, String.valueOf(currentQuantity + quantity));
                 return true;
             }
         }
@@ -139,7 +124,7 @@ public class Database {
             if (quantity > currentQuantity) {
                 return false;
             } else {
-                stock.updateValue(productName.trim(), 0, String.valueOf(currentQuantity - quantity));
+                stock.updateValue(productName, 0, String.valueOf(currentQuantity - quantity));
                 return true;
             }
         }
@@ -149,7 +134,6 @@ public class Database {
         if (!hasProduct(productName)) {
             return false;
         } else {
-            productName = productName.trim();
             products.remove(productName);
             stock.removeRow(productName);
             prices.removeRow(productName);
@@ -161,7 +145,6 @@ public class Database {
         if (!hasProduct(productName)) {
             System.out.println("Product not found.");
         } else {
-            productName = productName.trim();
             System.out.println(products.get(productName));
             System.out.println("Quantity: " + getStockQuantity(productName)
                     + " | Expiry: " + stock.getValue(productName, 1));
@@ -184,7 +167,7 @@ public class Database {
         if (!hasProduct(productName)) {
             return -1;
         } else {
-            return Double.valueOf(prices.getValue(productName.trim(), 0));
+            return Double.valueOf(prices.getValue(productName, 0));
         }
     }
 
@@ -192,7 +175,7 @@ public class Database {
         if (!hasProduct(productName)) {
             return -1;
         } else {
-            return Double.valueOf(prices.getValue(productName.trim(), 1));
+            return Double.valueOf(prices.getValue(productName, 1));
         }
     }
 
@@ -203,14 +186,11 @@ public class Database {
             return false;
         } else if (isBlank(contactNumber)) {
             return false;
+        } else if (members.containsKey(memberId)) {
+            return false;
         } else {
-            memberId = memberId.trim();
-            if (members.containsKey(memberId)) {
-                return false;
-            } else {
-                members.put(memberId, new Member(memberId, name.trim(), contactNumber.trim()));
-                return true;
-            }
+            members.put(memberId, new Member(memberId, name, contactNumber));
+            return true;
         }
     }
 
@@ -218,7 +198,7 @@ public class Database {
         if (isBlank(memberId)) {
             return null;
         } else {
-            return members.get(memberId.trim());
+            return members.get(memberId);
         }
     }
 
@@ -237,12 +217,12 @@ public class Database {
         } else if (!(discountRate <= 1)) {
             return -1;
         } else {
-            double price = roundMoney(getSellPrice(productName) * (1 - discountRate));
-            if (!memberId.trim().equals("")) {
+            double price = getSellPrice(productName) * (1 - discountRate);
+            if (!memberId.equals("")) {
                 if (getMember(memberId) == null) {
                     return -1;
                 } else {
-                    price = roundMoney(price * (1 - MEMBER_DISCOUNT_RATE));
+                    price = price * (1 - MEMBER_DISCOUNT_RATE);
                 }
             }
             if (price < getBuyPrice(productName)) {
@@ -258,7 +238,9 @@ public class Database {
         Member member = getMember(memberId);
         if (member == null) {
             return false;
-        } else if (!validPrice(paidAmount)) {
+        } else if (!(paidAmount >= 0)) {
+            return false;
+        } else if (paidAmount > Integer.MAX_VALUE) {
             return false;
         } else {
             return member.addPoints((int) paidAmount);

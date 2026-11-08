@@ -1,5 +1,4 @@
 public class Member {
-    private static final int MAX_POINTS = 1000000;
     private final String memberId;
     private final String name;
     private final String contactNumber;
@@ -31,7 +30,7 @@ public class Member {
     public boolean addPoints(int earnedPoints) {
         if (earnedPoints < 0) {
             return false;
-        } else if (earnedPoints > MAX_POINTS - points) {
+        } else if (earnedPoints > Integer.MAX_VALUE - points) {
             return false;
         } else {
             points = points + earnedPoints;

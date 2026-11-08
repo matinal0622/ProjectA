@@ -1,26 +1,26 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class Menu implements MenuUI {
-    private String[] menuOptions;
+    private ArrayList<String> menuOptions;
 
     public Menu(String[] menuOptions) {
-        this.menuOptions = new String[menuOptions.length];
-        for (int i = 0; i < menuOptions.length; i++) {
-            this.menuOptions[i] = menuOptions[i];
-        }
+        this.menuOptions = new ArrayList<>(Arrays.asList(menuOptions));
     }
 
     @Override
     public void printMenuOptions() {
         System.out.println();
-        System.out.println("========== " + menuOptions[0] + " ==========");
-        for (int i = 1; i < menuOptions.length; i++) {
-            System.out.println(i + ". " + menuOptions[i]);
+        System.out.println("========== " + menuOptions.get(0) + " ==========");
+        for (int i = 1; i < menuOptions.size(); i++) {
+            System.out.println(i + ". " + menuOptions.get(i));
         }
-        System.out.println(menuOptions.length + ". Exit");
+        System.out.println(menuOptions.size() + ". Exit");
     }
 
     @Override
     public int userInput() {
-        return userInput(1, menuOptions.length);
+        return userInput(1, menuOptions.size());
     }
 
     public int userInput(int maxInput) {
@@ -30,19 +30,19 @@ public class Menu implements MenuUI {
     public int userInput(int minInput, int maxInput) {
         while (true) {
             System.out.print("--> ");
-            String input = In.nextLine().trim();
-            for (int choice = minInput; choice <= maxInput; choice++) {
-                if (input.equals(String.valueOf(choice))) {
-                    return choice;
-                }
+            int choice = In.nextInt();
+            if (choice < minInput) {
+                System.out.println("Enter a number from " + minInput + " to " + maxInput + ".");
+            } else if (choice > maxInput) {
+                System.out.println("Enter a number from " + minInput + " to " + maxInput + ".");
+            } else {
+                return choice;
             }
-            System.out.println("Enter a number from " + minInput
-                    + " to " + maxInput + ".");
         }
     }
 
     @Override
     public String toString() {
-        return menuOptions[0] + ": " + menuOptions.length + " options";
+        return menuOptions.get(0) + ": " + menuOptions.size() + " options";
     }
 }

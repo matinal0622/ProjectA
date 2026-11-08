@@ -7,7 +7,7 @@ public abstract class Chocolate {
         if (name == null) {
             this.name = "";
         } else {
-            this.name = name.trim();
+            this.name = name;
         }
         this.weightGrams = weightGrams;
         this.cocoaPercentage = cocoaPercentage;

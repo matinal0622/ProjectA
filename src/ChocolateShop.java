@@ -21,8 +21,8 @@ public class ChocolateShop {
     }
 
     public void run() {
-        boolean End = false;
-        while (!End) {
+        boolean finished = false;
+        while (!finished) {
             menu.printMenuOptions();
             int choice = menu.userInput();
             if (choice == 1) {
@@ -30,7 +30,7 @@ public class ChocolateShop {
             } else if (choice == 2) {
                 handleMembership();
             } else if (choice == 3) {
-                End = true;
+                finished = true;
             }
         }
         System.out.println("Goodbye. Session data is not saved.");
@@ -47,7 +47,7 @@ public class ChocolateShop {
             System.out.println("5. View stock");
             System.out.println("0. Back");
             System.out.print("--> ");
-            String choice = In.nextLine().trim();
+            String choice = In.nextLine();
             if (choice.equals("0")) {
                 finished = true;
             } else if (choice.equals("1")) {
@@ -68,105 +68,97 @@ public class ChocolateShop {
 
     private void handleAddProduct() {
         System.out.print("Product name: ");
-        String productName = In.nextLine().trim();
+        String productName = In.nextLine();
         if (productName.equals("")) {
             System.out.println("Enter a new, non-empty product name.");
+            return;
         } else if (database.hasProduct(productName)) {
             System.out.println("Enter a new, non-empty product name.");
+            return;
+        }
+        System.out.print("Type (D) Dark, (M) Milk: ");
+        String type = In.nextLine().toUpperCase();
+        if (!type.equals("D") && !type.equals("M")) {
+            System.out.println("Invalid product type.");
+            return;
+        }
+        int weightGrams = readWholeNumber("Weight in grams (positive whole number): ", 1, Integer.MAX_VALUE);
+        if (weightGrams == -1) {
+            System.out.println("Invalid weight. Product not added.");
+            return;
+        }
+        int cocoaPercentage = readWholeNumber("Cocoa percentage (0-100): ", 0, 100);
+        if (cocoaPercentage == -1) {
+            System.out.println("Invalid cocoa percentage. Product not added.");
+            return;
+        }
+        int quantity = readWholeNumber("Initial quantity (0 or more): ", 0, Integer.MAX_VALUE);
+        if (quantity == -1) {
+            System.out.println("Invalid quantity. Product not added.");
+            return;
+        }
+        System.out.print("Expiry : ");
+        String expiry = In.nextLine();
+        double buyPrice = readPrice("Buy price: ");
+        if (buyPrice == -1) {
+            System.out.println("Invalid buy price. Product not added.");
+            return;
+        }
+        double sellPrice = readPrice("Sell price: ");
+        if (sellPrice == -1) {
+            System.out.println("Invalid sell price. Product not added.");
+            return;
+        }
+        Chocolate product;
+        if (type.equals("D")) {
+            product = new DarkChocolate(productName, weightGrams, cocoaPercentage);
         } else {
-            System.out.print("Type (D) Dark, (M) Milk: ");
-            String type = In.nextLine().trim().toUpperCase();
-            boolean validType;
-            if (type.equals("D")) {
-                validType = true;
-            } else if (type.equals("M")) {
-                validType = true;
-            } else {
-                validType = false;
-            }
-            if (!validType) {
-                System.out.println("Invalid product type.");
-            } else {
-                int weightGrams = readWholeNumber("Weight in grams (1-1000000): ", 1, 1000000);
-                if (weightGrams == -1) {
-                    System.out.println("Invalid weight. Product not added.");
-                } else {
-                    int cocoaPercentage = readWholeNumber("Cocoa percentage (0-100): ", 0, 100);
-                    if (cocoaPercentage == -1) {
-                        System.out.println("Invalid cocoa percentage. Product not added.");
-                    } else {
-                        int quantity = readWholeNumber("Initial quantity (0-1000000): ", 0, 1000000);
-                        if (quantity == -1) {
-                            System.out.println("Invalid quantity. Product not added.");
-                        } else {
-                            System.out.print("Expiry : ");
-                            String expiry = In.nextLine().trim();
-                            double buyPrice = readPrice("Buy price (0-1000000, up to 2 decimal places): ");
-                            if (buyPrice == -1) {
-                                System.out.println("Invalid buy price. Product not added.");
-                            } else {
-                                double sellPrice = readPrice("Sell price (0-1000000, up to 2 decimal places): ");
-                                if (sellPrice == -1) {
-                                    System.out.println("Invalid sell price. Product not added.");
-                                } else {
-                                    Chocolate product;
-                                    if (type.equals("D")) {
-                                        product = new DarkChocolate(productName, weightGrams, cocoaPercentage);
-                                    } else {
-                                        product = new MilkChocolate(productName, weightGrams, cocoaPercentage);
-                                    }
-                                    if (database.addProduct(product, quantity, expiry, buyPrice, sellPrice)) {
-                                        System.out.println("Product added.");
-                                        database.printProduct(productName);
-                                    } else {
-                                        System.out.println(
-                                                "Product not added. Check ranges and sell price >= buy price.");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            product = new MilkChocolate(productName, weightGrams, cocoaPercentage);
+        }
+        if (database.addProduct(product, quantity, expiry, buyPrice, sellPrice)) {
+            System.out.println("Product added.");
+            database.printProduct(productName);
+        } else {
+            System.out.println("Product not added. Check ranges and sell price >= buy price.");
         }
     }
 
     private void handleChangeStock(int choice) {
         System.out.print("Product name: ");
-        String productName = In.nextLine().trim();
+        String productName = In.nextLine();
         if (!database.hasProduct(productName)) {
             System.out.println("Product not found.");
+            return;
+        }
+        System.out.println("Current quantity: " + database.getStockQuantity(productName));
+        int quantity = readWholeNumber("Quantity to change (positive whole number): ", 1, Integer.MAX_VALUE);
+        if (quantity == -1) {
+            System.out.println("Invalid quantity. Stock unchanged.");
+            return;
+        }
+        boolean updated;
+        if (choice == 2) {
+            updated = database.increaseStock(productName, quantity);
         } else {
-            System.out.println("Current quantity: " + database.getStockQuantity(productName));
-            int quantity = readWholeNumber("Quantity to change (1-1000000): ", 1, 1000000);
-            if (quantity == -1) {
-                System.out.println("Invalid quantity. Stock unchanged.");
-            } else {
-                boolean updated;
-                if (choice == 2) {
-                    updated = database.increaseStock(productName, quantity);
-                } else {
-                    updated = database.decreaseStock(productName, quantity);
-                }
-                if (updated) {
-                    System.out.println("Stock updated. Current quantity: "
-                            + database.getStockQuantity(productName));
-                } else {
-                    System.out.println("Stock unchanged. Check quantity, available stock and the 1000000 limit.");
-                }
-            }
+            updated = database.decreaseStock(productName, quantity);
+        }
+        if (updated) {
+            System.out.println("Stock updated. Current quantity: "
+                    + database.getStockQuantity(productName));
+        } else {
+            System.out.println("Stock unchanged. Check available stock and the integer range.");
         }
     }
 
     private void handleRemoveProduct() {
         System.out.print("Product name: ");
-        String productName = In.nextLine().trim();
+        String productName = In.nextLine();
         if (!database.hasProduct(productName)) {
             System.out.println("Product not found.");
         } else {
             database.printProduct(productName);
             System.out.print("Remove this product and its remaining stock? (Y/N): ");
-            String answer = In.nextLine().trim().toUpperCase();
+            String answer = In.nextLine().toUpperCase();
             if (answer.equals("Y")) {
                 if (database.removeProduct(productName)) {
                     System.out.println("Product removed.");
@@ -179,7 +171,7 @@ public class ChocolateShop {
 
     private void handleViewStock() {
         System.out.print("Product name (blank for all products): ");
-        String productName = In.nextLine().trim();
+        String productName = In.nextLine();
         if (productName.equals("")) {
             database.printStock();
         } else {
@@ -189,14 +181,14 @@ public class ChocolateShop {
 
     private void handleMembership() {
         System.out.print("(A) Add member, (V) View member: ");
-        String action = In.nextLine().trim().toUpperCase();
+        String action = In.nextLine().toUpperCase();
         if (action.equals("A")) {
             System.out.print("Member ID: ");
-            String memberId = In.nextLine().trim();
+            String memberId = In.nextLine();
             System.out.print("Member name: ");
-            String name = In.nextLine().trim();
+            String name = In.nextLine();
             System.out.print("Contact number: ");
-            String contactNumber = In.nextLine().trim();
+            String contactNumber = In.nextLine();
             if (database.addMember(memberId, name, contactNumber)) {
                 System.out.println("Member added.");
             } else {
@@ -204,7 +196,7 @@ public class ChocolateShop {
             }
         } else if (action.equals("V")) {
             System.out.print("Member ID: ");
-            String memberId = In.nextLine().trim();
+            String memberId = In.nextLine();
             Member member = database.getMember(memberId);
             if (member == null) {
                 System.out.println("Member not found.");
@@ -216,68 +208,25 @@ public class ChocolateShop {
         }
     }
 
-    // These checks belong to the stock form, not the classroom In class.
     private int readWholeNumber(String prompt, int minimum, int maximum) {
         System.out.print(prompt);
-        String input = In.nextLine().trim();
-        if (input.equals("")) {
+        int value = In.nextInt();
+        if (value < minimum) {
             return -1;
-        } else if (input.length() > 7) {
+        } else if (value > maximum) {
             return -1;
         } else {
-            for (int i = 0; i < input.length(); i++) {
-                if (input.charAt(i) < '0') {
-                    return -1;
-                } else if (input.charAt(i) > '9') {
-                    return -1;
-                }
-            }
-            int value = Integer.valueOf(input);
-            if (value < minimum) {
-                return -1;
-            } else if (value > maximum) {
-                return -1;
-            } else {
-                return value;
-            }
+            return value;
         }
     }
 
     private double readPrice(String prompt) {
         System.out.print(prompt);
-        String input = In.nextLine().trim();
-        if (input.equals("")) {
-            return -1;
-        } else if (input.length() > 10) {
+        double value = In.nextDouble();
+        if (value < 0) {
             return -1;
         } else {
-            int point = input.indexOf('.');
-            if (point == 0) {
-                return -1;
-            } else if (point == input.length() - 1) {
-                return -1;
-            } else {
-                if (point >= 0) {
-                    if (input.length() - point - 1 > 2) {
-                        return -1;
-                    }
-                }
-                for (int i = 0; i < input.length(); i++) {
-                    if (i != point) {
-                        if (input.charAt(i) < '0') {
-                            return -1;
-                        } else if (input.charAt(i) > '9') {
-                            return -1;
-                        }
-                    }
-                }
-                double value = Double.valueOf(input);
-                if (value > 1000000) {
-                    return -1;
-                } else {
-                    return value;
-                }
-            }
+            return value;
         }
     }
 
