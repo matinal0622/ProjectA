@@ -1,6 +1,9 @@
+import java.util.ArrayList;
+
 public class ChocolateShop {
     private Database database;
-    private MenuUI menu;
+    private MenuUI menu; 
+    private ArrayList<PurchaseRecord> purchaseRecords = new ArrayList<>();
 
     public ChocolateShop() {
         database = new Database();
@@ -9,11 +12,33 @@ public class ChocolateShop {
         addStartingData();
     }
 
+    public boolean purchase(String customerId, String productName, int quantity){
+        if (!database.hasProduct(productName)){
+            return false;
+        }else if (quantity > database.getStockQuantity(productName)){
+            return false;
+        }else{
+            database.decreaseStock(productName, quantity);
+            double amount = quantity * database.getCheckoutPrice(productName, customerId);
+            PurchaseRecord purchaseRecord = new PurchaseRecord(customerId, productName, quantity, amount);
+            purchaseRecords.add(purchaseRecord);
+            return true;
+        }
+    }
+
+    public void printPurchaseRecords(){
+        for (int i = 0; i < purchaseRecords.size(); i++){
+            System.out.println(purchaseRecords.get(i));
+        }
+
+    }
+
     private void addStartingData() {
         Chocolate dark = new DarkChocolate("Dark Chocolate", 100, 70);
         Chocolate milk = new MilkChocolate("Milk Chocolate", 100, 35);
         database.addProduct(dark, 3, "", 2.0, 5.0);
         database.addProduct(milk, 10, "", 1.0, 4.0);
+        database.addMember("001", "John", "111222");
     }
 
     public Database getDatabase() {
@@ -250,6 +275,10 @@ public class ChocolateShop {
     }
 
     public static void main(String[] args) {
-        new ChocolateShop().run();
+        ChocolateShop shop = new ChocolateShop();
+        Customer john = new Customer("001", "john", shop);
+        john.purchase("Dark", 1);
+        shop.printPurchaseRecords();
+        shop.run();
     }
 }
