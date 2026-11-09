@@ -19,7 +19,13 @@ public class ChocolateShop {
             return false;
         }else{
             database.decreaseStock(productName, quantity);
-            double amount = quantity * database.getCheckoutPrice(productName, customerId);
+            double amount;
+            if (database.getMember(customerId) == null){
+                amount = quantity * database.getSellPrice(productName);
+            }else{
+                amount = quantity * database.getCheckoutPrice(productName, customerId);
+                database.addMemberPoints(customerId, amount);
+            }
             PurchaseRecord purchaseRecord = new PurchaseRecord(customerId, productName, quantity, amount);
             purchaseRecords.add(purchaseRecord);
             return true;
@@ -276,8 +282,10 @@ public class ChocolateShop {
 
     public static void main(String[] args) {
         ChocolateShop shop = new ChocolateShop();
-        Customer john = new Customer("001", "john", shop);
-        john.purchase("Dark", 1);
+        Customer john = new Customer("001", "John", shop);
+        john.purchase("Dark Chocolate", 1);
+        Customer jeff = new Customer("002", "Jeff", shop);
+        jeff.purchase("Milk Chocolate", 2);
         shop.printPurchaseRecords();
         shop.run();
     }
