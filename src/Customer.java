@@ -9,6 +9,10 @@ public class Customer {
         this.shop = shop;
     }
 
+    public void setShop(ChocolateShop shop){
+        this.shop = shop;
+    }
+
     public String getId(){
         return id;
     }

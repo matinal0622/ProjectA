@@ -11,12 +11,14 @@ public class Database {
     private DataTable prices;
     private HashMap<String, Chocolate> products;
     private HashMap<String, Member> members;
+    private HashMap<String, Customer> customers;
 
     public Database() {
         stock = new DataTable(new ArrayList<>(Arrays.asList("Quantity", "Expiry")));
         prices = new DataTable(new ArrayList<>(Arrays.asList("Buy Price", "Sell Price")));
         products = new HashMap<>();
         members = new HashMap<>();
+        customers = new HashMap<>();
     }
 
     private boolean isBlank(String value) {
@@ -154,6 +156,19 @@ public class Database {
         }
         members.put(memberId, new Member(memberId, name.trim(), contactNumber.trim()));
         return true;
+    }
+
+    public boolean addCustomer(String customerId, String name, ChocolateShop shop) {
+        customerId = customerId.trim();
+        if(customers.containsKey(customerId)){
+            return false;
+        }
+        customers.put(customerId, new Customer(customerId, name.trim(), shop));
+        return true;
+    }
+
+    public Customer getCustomer(String customerId){
+        return customers.get(customerId);
     }
 
     public Member getMember(String memberId) {
