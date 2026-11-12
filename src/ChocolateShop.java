@@ -1,12 +1,42 @@
+import java.util.ArrayList;
+
 public class ChocolateShop {
     private Database database;
-    private MenuUI menu;
+    private MenuUI menu; 
+    private ArrayList<PurchaseRecord> purchaseRecords = new ArrayList<>();
 
     public ChocolateShop() {
         database = new Database();
-        String[] menuOptions = { "Chocolate Shop", "Stock management", "Membership" };
+        String[] menuOptions = { "Chocolate Shop", "Stock management", "Membership", "Customer", "Purchase" ,"Print purchase record" };
         menu = new Menu(menuOptions);
         addStartingData();
+    }
+
+    public boolean purchase(String customerId, String productName, int quantity){
+        if (!database.hasProduct(productName)){
+            return false;
+        }else if (quantity > database.getStockQuantity(productName)){
+            return false;
+        }else{
+            database.decreaseStock(productName, quantity);
+            double amount;
+            if (database.getMember(customerId) == null){
+                amount = quantity * database.getSellPrice(productName);
+            }else{
+                amount = quantity * database.getCheckoutPrice(productName, customerId);
+                database.addMemberPoints(customerId, amount);
+            }
+            PurchaseRecord purchaseRecord = new PurchaseRecord(customerId, productName, quantity, amount);
+            purchaseRecords.add(purchaseRecord);
+            return true;
+        }
+    }
+
+    public void printPurchaseRecords(){
+        for (int i = 0; i < purchaseRecords.size(); i++){
+            System.out.println(purchaseRecords.get(i));
+        }
+
     }
 
     private void addStartingData() {
@@ -14,6 +44,8 @@ public class ChocolateShop {
         Chocolate milk = new MilkChocolate("Milk Chocolate", 100, 35);
         database.addProduct(dark, 3, "", 2.0, 5.0);
         database.addProduct(milk, 10, "", 1.0, 4.0);
+        database.addMember("001", "John", "111222");
+        database.addCustomer("001", "John", this);
     }
 
     public Database getDatabase() {
@@ -30,6 +62,12 @@ public class ChocolateShop {
             } else if (choice == 2) {
                 handleMembership();
             } else if (choice == 3) {
+                handleCustomer();   
+            } else if (choice == 4) {
+                handlePurchase();
+            } else if (choice == 5) {
+                printPurchaseRecords();
+            } else if (choice == 6) {
                 finished = true;
             }
         }
@@ -176,6 +214,48 @@ public class ChocolateShop {
         }
     }
 
+    private void handleCustomer() {
+        System.out.print("(A) Add customer, (V) View customer: ");
+        String action = In.nextLine().trim().toUpperCase();
+        if (!action.equals("A") && !action.equals("V")) {
+            System.out.println("Invalid action.");
+            return;
+        }
+        System.out.print("Customer ID: ");
+        String customerId = In.nextLine().trim();
+        if (action.equals("A")) {
+            System.out.print("Customer name: ");
+            String name = In.nextLine().trim();
+            if (database.addCustomer(customerId, name, this)) {
+                System.out.println("Customer added.");
+            } else {
+                System.out.println("Customer was not added. Check fields and duplicate ID.");
+            }
+        } else {
+            Customer customer = database.getCustomer(customerId);
+            if (customer == null) {
+                System.out.println("Customer not found.");
+            } else {
+                System.out.println(customer);
+            }
+        }
+    }
+
+    private void handlePurchase(){
+        System.out.println("Customer ID: ");
+        String customerId = In.nextLine().trim();
+        System.out.println("Product name: ");
+        String productName = In.nextLine().trim();
+        System.out.println("quantity: ");
+        int quantity = In.nextInt();
+        boolean b = purchase(customerId, productName, quantity);
+        if (b == false){
+            System.out.println("We don't have sufficient stock.");
+        }else{
+            System.out.println("You have purchased " + quantity + " " + productName + ".");
+        }
+    }
+
     private void handleMembership() {
         System.out.print("(A) Add member, (V) View member: ");
         String action = In.nextLine().trim().toUpperCase();
@@ -250,6 +330,7 @@ public class ChocolateShop {
     }
 
     public static void main(String[] args) {
-        new ChocolateShop().run();
+        ChocolateShop shop = new ChocolateShop();
+        shop.run();
     }
 }
